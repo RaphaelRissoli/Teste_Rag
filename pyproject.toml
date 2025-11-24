@@ -1,0 +1,22 @@
+[project]
+name = "teste-tecnico"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain-community>=0.4.1",
+    "langchain-openai>=1.1.0",
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.16.0",
+    "rich>=14.2.0",
+]
+ignore = [
+  "T201",   # Checks for print statements, 
+  "COM812", # Checks for the absence of trailing commas.
+  "INP001", # Checks for packages that are missing an __init__.py file.
+  "D",      # All pydocstyle (D)
+  "ANN401", # Checks that function arguments are annotated with a more specific type than Any.
+  "ERA001", # Checks for commented-out Python code.
+  "A004",   # Shadowing Python Builtin
+]
