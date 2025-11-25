@@ -10,6 +10,11 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ollama:
     image: ollama/ollama:latest
@@ -19,6 +24,49 @@ services:
     volumes:
       - ollama:/root/.ollama
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: micro-rag-api
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_LLM_MODEL=llama3.2
+      - OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+      - VECTOR_DB_URL=http://qdrant:6333
+      - VECTOR_DB_COLLECTION_NAME=rag_docs
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - LOG_LEVEL=INFO
+      - CHUNK_SIZE=800
+      - CHUNK_OVERLAP=200
+      - DEFAULT_TOP_K=5
+      # Langfuse (opcional - descomente e configure se necessário)
+      # - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      # - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      # - LANGFUSE_HOST=https://cloud.langfuse.com
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src  # Para desenvolvimento com hot-reload
+    depends_on:
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   qdrant_storage:
