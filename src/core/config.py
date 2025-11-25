@@ -9,10 +9,11 @@ class Settings:
     OLLAMA_EMBEDDING_MODEL: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     
+    
     # Qdrant
-    QDRANT_HOST: str = os.getenv("QDRANT_HOST", "localhost")
-    QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", "6333"))
-    QDRANT_COLLECTION_NAME: str = os.getenv("QDRANT_COLLECTION_NAME", "rag_documents")
+    VECTOR_DB_BACKEND: str = "qdrant"
+    VECTOR_DB_URL: str = os.getenv("VECTOR_DB_URL", "http://localhost:6333")
+    VECTOR_DB_COLLECTION_NAME: str = os.getenv("VECTOR_DB_COLLECTION_NAME", "rag_docs")
     
     # RAG Config
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "800"))
