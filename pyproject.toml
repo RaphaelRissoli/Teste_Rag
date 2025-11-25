@@ -16,6 +16,9 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "python-dotenv>=1.0.0",
     "tiktoken>=0.8.0",
+    "langfuse>=2.0.0",
+    "langfuse-langchain>=2.0.0",
+    "langchain>=1.1.0",
 ]
 ignore = [
   "T201",   # Checks for print statements, 
