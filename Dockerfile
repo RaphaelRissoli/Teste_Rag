@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.cargo/bin:$PATH"
+# Instala uv via pip
+RUN pip install --no-cache-dir uv
 
 COPY pyproject.toml uv.lock ./
 
-
+# Instala dependências do projeto usando uv
 RUN uv sync --frozen --no-dev
 
 
