@@ -2,7 +2,7 @@ from typing import List
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-from core.config import settings
+from src.core.config import settings
 
 
 class ChunkingService:
@@ -36,6 +36,7 @@ class ChunkingService:
             chunk.metadata["chunk_index"] = idx
 
         return chunks
+
 
 def chunk_documents(documents: List[Document]) -> List[Document]:
     return ChunkingService().split(documents)

@@ -1,7 +1,9 @@
 # src/core/embeddings_config.py
 
 from pydantic import BaseModel
-from core.config import settings
+
+from src.core.config import settings
+
 
 class EmbeddingsConfig(BaseModel):
     model: str = settings.OLLAMA_EMBEDDING_MODEL

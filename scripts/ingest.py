@@ -1,11 +1,11 @@
 
 from src.clients.vector_store_client import get_vector_store_client
-from src.ingestion.document_loader import load_all_documents
+from src.ingestion.document_loader import load_documents
 from src.ingestion.chunking import chunk_documents
 
 
 def main():
-    docs = load_all_documents()
+    docs = load_documents()
     chunks = chunk_documents(docs)
 
     vs_client = get_vector_store_client()

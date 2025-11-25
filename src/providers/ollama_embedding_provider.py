@@ -3,8 +3,8 @@
 from typing import Iterable, List
 from langchain_ollama import OllamaEmbeddings
 
-from providers.embedding_provider import EmbeddingProvider
-from src.core.embeddings_config import EmbeddingsConfig  # já existe no seu projeto
+from src.providers.embedding_provider import EmbeddingProvider
+from src.core.embeddings_config import EmbeddingsConfig
 
 
 class OllamaEmbeddingProvider(EmbeddingProvider):
