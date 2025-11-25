@@ -2,7 +2,7 @@
 
 from typing import List
 
-from langchain_community.vectorstores import Qdrant
+from langchain_qdrant import QdrantVectorStore
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStoreRetriever
 from qdrant_client import QdrantClient
@@ -22,10 +22,10 @@ class QdrantVectorStoreProvider(VectorStoreProvider):
         self._emb_client = embeddings_client
 
         self._client = QdrantClient(url=config.url)
-        self._vs = Qdrant(
+        self._vs = QdrantVectorStore(
             client=self._client,
             collection_name=config.collection_name,
-            embeddings=self._emb_client.as_langchain_embeddings,
+            embedding=self._emb_client.as_langchain_embeddings,
         )
 
     def index_documents(self, documents: List[Document]) -> None:
