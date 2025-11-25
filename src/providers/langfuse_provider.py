@@ -4,6 +4,7 @@ from langfuse.callback import CallbackHandler
 from src.core.config import settings
 from src.prompts.rag_prompt.V1.prompt_rag import RAG_PROMPT as LOCAL_RAG_PROMPT
 from src.prompts.system_prompt.v1.system_prompt import SYSTEM_PROMPT_V1 as LOCAL_SYSTEM_PROMPT
+from src.prompts.guardrrails.v1.guardrrails_prompt import GUARDRAIL_PROMPT_V1 as LOCAL_GUARDRAIL_PROMPT
 
 class LangfuseProvider:
     """
@@ -24,7 +25,6 @@ class LangfuseProvider:
                     host=settings.LANGFUSE_HOST,
                 )
             except Exception:
-                # Logar erro se tiver logger configurado
                 self._client = None
 
     @property
@@ -63,9 +63,22 @@ class LangfuseProvider:
                 # Fallback silencioso
                 pass
         
-        # Garante que retorna string
         return str(sys_prompt), str(rag_prompt)
 
-# Instância singleton para ser importada
+    def get_guardrail_prompt(self) -> str:
+        """
+        Retorna o prompt de guardrail.
+        """
+        prompt = LOCAL_GUARDRAIL_PROMPT
+
+        if self.is_enabled and self._client:
+            try:
+                lf_prompt = self._client.get_prompt("guardrail-prompt")
+                if lf_prompt:
+                    prompt = lf_prompt.get_langchain_prompt()
+            except Exception:
+                pass
+        
+        return str(prompt)
 langfuse_provider = LangfuseProvider()
 

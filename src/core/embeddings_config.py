@@ -1,4 +1,4 @@
-# src/core/embeddings_config.py
+
 
 from pydantic import BaseModel
 

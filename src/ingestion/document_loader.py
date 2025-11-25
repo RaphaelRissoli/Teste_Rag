@@ -12,7 +12,6 @@ def load_documents(data_dir: str = "data") -> List[Document]:
         if file_path.suffix.lower() == ".pdf":
             loader = PyPDFLoader(str(file_path))
             docs = loader.load()
-            # Adicionar metadata com nome do arquivo
             for doc in docs:
                 doc.metadata["source"] = file_path.name
             documents.extend(docs)

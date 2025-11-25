@@ -7,12 +7,8 @@ from src.core.vector_store_config import VectorStoreConfig
 def main() -> None:
     cfg = VectorStoreConfig()
     client = QdrantClient(url=cfg.url)
-
-    # descobre o tamanho do vetor a partir do modelo de embedding
     emb_client = get_embeddings_client()
     dim = len(emb_client.embed_query("test"))
-
-    # cria a collection se não existir
     if cfg.collection_name not in [c.name for c in client.get_collections().collections]:
         client.create_collection(
             collection_name=cfg.collection_name,

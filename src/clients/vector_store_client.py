@@ -1,4 +1,3 @@
-# src/clients/vector_store_client.py
 
 from __future__ import annotations
 

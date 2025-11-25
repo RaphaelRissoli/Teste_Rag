@@ -14,8 +14,10 @@ from src.api.schemas import (
 from src.clients.retrieval_client import retrieval_client
 from src.core.config import settings
 from src.providers.langfuse_provider import langfuse_provider
+from src.utils.logger import logger
 from src.utils.rag_helpers import build_citations, build_context, estimate_tokens
 
+from src.services.guardrrails_service import guardrail_service
 
 class QAService:
     """
@@ -37,20 +39,21 @@ class QAService:
 
     def _run_guardrails(self, question: str) -> GuardrailStatus:
         """
-        Guardrails básicos.
-
-        Esta implementação é intencionalmente simples e sempre permite,
-        mas a estrutura já está pronta para ser expandida (injeção, domínio, etc.).
+        Executa os guardrails de segurança.
         """
-        # TODO: integrar com módulo de guardrails quando disponível.
+        is_blocked, reason = guardrail_service.validate_question(question)
+        logger.debug(f"Guardrails: {is_blocked}, {reason}")
+        if is_blocked:
+            return GuardrailStatus(blocked=True, reason=reason)
+            
         return GuardrailStatus(blocked=False, reason=None)
 
     @observe(name="handle_query")
     def handle_query(self, request: QueryRequest) -> QueryResponse:
         inicio_total = time.monotonic()
-
-        # 1. Guardrails
+        logger.debug(f"Request: {request.question}")
         guardrail_status = self._run_guardrails(request.question)
+        logger.debug(f"Guardrail Status: {guardrail_status}")
         if guardrail_status.blocked:
             metrics = Metrics(
                 total_latency_ms=0.0,
@@ -68,39 +71,28 @@ class QAService:
                 metrics=metrics,
                 guardrail_status=guardrail_status,
             )
-
-        # 2. Retrieval
         top_k = request.top_k or settings.DEFAULT_TOP_K
         inicio_retrieval = time.monotonic()
         docs = retrieval_client.retrieve(request.question, top_k=top_k)
         fim_retrieval = time.monotonic()
         retrieval_latency_ms = (fim_retrieval - inicio_retrieval) * 1000
-
-        # 3. Construção do contexto / prompt
-        # Busca prompts (Langfuse ou Local via provider)
+        
         sys_prompt_txt, rag_prompt_txt = langfuse_provider.get_prompts()
-        print(sys_prompt_txt)
-        print(rag_prompt_txt)
+        logger.debug(f"System Prompt: {sys_prompt_txt[:50]}...")
+        logger.debug(f"RAG Prompt Template: {rag_prompt_txt[:50]}...")
+        
         contexto = build_context(docs)
         
-        # Formata o prompt RAG
-        # O provider já garante que temos strings, mas verificamos placeholders
         if "{contexto}" in rag_prompt_txt and "{question}" in rag_prompt_txt:
             prompt_rag = rag_prompt_txt.replace("{contexto}", contexto).replace("{question}", request.question)
         else:
-            # Fallback se placeholders estiverem errados no prompt remoto
-            # Poderíamos logar um aviso aqui
-            # Tenta formatar mesmo assim ou usa uma string básica
             prompt_rag = f"Contexto:\n{contexto}\n\nPergunta: {request.question}"
 
-        # Opcionalmente ancorar em um system prompt
         sys_txt = sys_prompt_txt.strip()
         full_prompt = f"{sys_txt}\n\n{prompt_rag}"
 
-        # 4. Geração com LLM
         inicio_geracao = time.monotonic()
         
-        # Configura callbacks do Langfuse para este invoke
         callbacks = []
         handler = langfuse_provider.get_callback_handler()
         if handler:
@@ -112,10 +104,8 @@ class QAService:
 
         answer_text = resposta.content if hasattr(resposta, "content") else str(resposta)
 
-        # 5. Métricas de tokens e custo
         prompt_tokens = estimate_tokens(full_prompt)
         completion_tokens = estimate_tokens(answer_text)
-        # Como Ollama roda local, custo financeiro é efetivamente 0
         estimated_cost_usd = 0.0
 
         total_latency_ms = (time.monotonic() - inicio_total) * 1000
@@ -131,7 +121,6 @@ class QAService:
             context_size_chars=len(contexto),
         )
 
-        # 6. Citações
         citations = build_citations(docs)
 
         return QueryResponse(

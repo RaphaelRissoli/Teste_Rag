@@ -16,7 +16,6 @@ def estimate_tokens(text: str) -> int:
     """
     if not text:
         return 0
-    # Heurística simples: 1 token ~ 4 caracteres
     return max(1, len(text) // 4)
 
 
@@ -37,12 +36,10 @@ def build_citations(docs: List[Document]) -> List[Citation]:
     for doc in docs:
         source = doc.metadata.get("source", "desconhecido")
         page = doc.metadata.get("page")
-        # LangChain + Qdrant nem sempre retornam score explícito;
-        # mantemos 0.0 por padrão
         relevance_score = float(doc.metadata.get("score", 0.0))
 
         excerpt = doc.page_content
-        if len(excerpt) > 500:  # noqa: PLR2004 - manter simples por enquanto
+        if len(excerpt) > 500:
             excerpt = excerpt[:500] + "..."
 
         citations.append(

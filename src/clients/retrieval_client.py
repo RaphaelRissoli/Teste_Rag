@@ -30,5 +30,4 @@ class RetrievalClient:
         return self._client.retriever(k=k)
 
 
-# Instância singleton, compatível com o padrão anterior
 retrieval_client = RetrievalClient()

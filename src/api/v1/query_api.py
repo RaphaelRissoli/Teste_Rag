@@ -4,7 +4,7 @@ from src.api.schemas import QueryRequest, QueryResponse
 from src.services.qa_service import qa_service
 
 
-# Router da versão v1 da API de Q&A
+
 qa_router = APIRouter(prefix="/v1", tags=["qa"])
 
 

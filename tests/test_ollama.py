@@ -39,7 +39,7 @@ def test_llm():
     print("\n🧪 Testando geração de texto...")
     try:
         llm = ChatOllama(
-            model="llama3.2",  # Tente com o modelo que você tem
+            model="llama3.2",
             base_url="http://localhost:11434",
             temperature=0.3
         )

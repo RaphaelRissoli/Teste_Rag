@@ -12,7 +12,9 @@ from fastapi import FastAPI
 
 from src.api.routes import router as api_router
 from src.core.config import settings
+from src.utils.logger import logger
 
+logger.info("Inicializando Micro-RAG API...")
 
 app = FastAPI(
     title="Micro-RAG API",
